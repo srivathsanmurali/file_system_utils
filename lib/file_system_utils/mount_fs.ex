@@ -18,6 +18,7 @@ defmodule FileSystemUtils.MountFS do
     - exfat
     - etc
   """
+  @spec mount(String.t(), String.t(), String.t()) :: :ok | {:error, String.t()}
   def mount(device_path, mount_point_path, fs_type \\ "ext4") do
     {_result, err_code} =
       System.cmd("mount", ["-t", fs_type, device_path, mount_point_path], stderr_to_stdout: true)
@@ -32,6 +33,7 @@ defmodule FileSystemUtils.MountFS do
   + device_path:
     Path to the device
   """
+  @spec umount(String.t()) :: :ok | {:error, String.t()}
   def umount(device_path) do
     {_result, err_code} = System.cmd("umount", [device_path], stderr_to_stdout: true)
     parse_error_code(err_code)
