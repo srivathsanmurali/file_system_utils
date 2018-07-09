@@ -20,10 +20,19 @@ defmodule FileSystemUtils.MountFS do
   """
   @spec mount(String.t(), String.t(), String.t()) :: :ok | {:error, String.t()}
   def mount(device_path, mount_point_path, fs_type \\ "ext4") do
-    {_result, err_code} =
-      System.cmd("mount", ["-t", fs_type, device_path, mount_point_path], stderr_to_stdout: true)
-
-    parse_error_code(err_code)
+    with true <- File.exists?(device_path),
+         true <- File.dir?(mount_point_path),
+         {_result, err_code} <-
+           System.cmd(
+             "mount",
+             ["-t", fs_type, device_path, mount_point_path],
+             stderr_to_stdout: true
+           ) do
+      parse_error_code(err_code)
+    else
+      false -> {:error, "Device path or mount point path not valid"}
+      err -> err
+    end
   end
 
   @doc """
@@ -35,8 +44,12 @@ defmodule FileSystemUtils.MountFS do
   """
   @spec umount(String.t()) :: :ok | {:error, String.t()}
   def umount(device_path) do
-    {_result, err_code} = System.cmd("umount", [device_path], stderr_to_stdout: true)
-    parse_error_code(err_code)
+    with true <- File.exists?(device_path),
+         {_result, err_code} <- System.cmd("umount", [device_path], stderr_to_stdout: true) do
+      parse_error_code(err_code)
+    else
+      false -> {:error, "Device path doesn't exist"}
+    end
   end
 
   defp parse_error_code(0), do: :ok
