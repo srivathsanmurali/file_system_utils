@@ -1,15 +1,52 @@
 defmodule FileSystemUtils.ListDevices do
+  @moduledoc """
+    Provides functions to get information about devices available in the system.
+  """
+
+  @spec lsblk(devices :: binary | [binary]) :: map
   @doc """
     lsblk - list block devices
+    
+    returns the output of the lsblk command line utilty as json object.
+
+    ## Arguments
+    + devices (default = "")
+      If device(s) is passed as argument, information is only retrieved for those.
   """
   def lsblk(devices \\ ""), do: do_lsblk(parse_device_to_list(devices))
 
+  @spec lsblk_only_scsi(devices :: binary | [binary]) :: map
+  @doc """
+    Gives json objects that provides information on only the scsi devices
+    
+    ## Arguments
+    + devices (default = "")
+      If device(s) is passed as argument, information is only retrieved for those.
+  """
   def lsblk_only_scsi(devices \\ ""), do: do_lsblk(["--scsi"] ++ parse_device_to_list(devices))
 
+  @spec list_devices_with_label(Boolean) :: [binary]
+  @doc """
+    Lists all devices that have a label
+
+    ## Arguments
+    - full_path (default = false)
+      + false: Return list of device names.
+      + true : Returns list of paths to device.
+  """
   def list_devices_with_label(full_path \\ false)
   def list_devices_with_label(false), do: File.ls("/dev/disk/by-label")
   def list_devices_with_label(true), do: Path.wildcard("/dev/disk/by-label/*")
 
+  @spec list_devices(Boolean) :: [binary]
+  @doc """
+    List all the mountable devices in the system.
+
+    ## Arguments
+    - full_path (default = false)
+      + false: Return list of device names.
+      + true : Returns list of paths to device.
+  """
   def list_devices(full_path \\ false)
 
   def list_devices(true) do

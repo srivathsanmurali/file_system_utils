@@ -7,7 +7,8 @@ defmodule FileSystemUtils.MixProject do
       version: "0.1.0",
       elixir: "~> 1.6",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      docs: [markdown_processor: ExDoc.Markdown.Cmark]
     ]
   end
 
@@ -22,6 +23,7 @@ defmodule FileSystemUtils.MixProject do
   defp deps do
     [
       {:jason, "~> 1.1"},
+      {:cmark, "~> 0.6", only: :dev},
       {:ex_doc, "~> 0.16", only: :dev, runtime: false}
     ]
   end

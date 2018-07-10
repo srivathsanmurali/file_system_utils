@@ -1,8 +1,21 @@
 defmodule FileSystemUtils.MountFS do
+  @moduledoc """
+    Provides functions to mount and unmount filesystems.
+
+    **Requires root user permission to run mount/umount.**
+
+    > **Declaimer**
+    >
+    > Use at own risk.
+    > Make sure you know what you are doing.
+  """
+
   @doc """
   mount - mount a filesystem
 
-  ## arguments
+  **Requires root permission**
+
+  ## Arguments
   + device_path:
     Path to the device.
 
@@ -38,7 +51,9 @@ defmodule FileSystemUtils.MountFS do
   @doc """
   umount - unmount file systems
 
-  ## arguments
+  **Requires root permission**
+
+  ## Arguments
   + device_path:
     Path to the device
   """
