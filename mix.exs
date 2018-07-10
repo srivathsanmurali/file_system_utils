@@ -4,19 +4,25 @@ defmodule FileSystemUtils.MixProject do
   def project do
     [
       app: :file_system_utils,
+      name: "file_system_utils",
       version: "0.1.0",
       elixir: "~> 1.6",
       start_permanent: Mix.env() == :prod,
+      description: description(),
+      package: package(),
       deps: deps(),
-      docs: [markdown_processor: ExDoc.Markdown.Cmark]
+      docs: [markdown_processor: ExDoc.Markdown.Cmark],
+      source_url: "https://github.com/srivathsanmurali/file_system_utils"
     ]
   end
 
   # Run "mix help compile.app" to learn about applications.
   def application do
-    [
-      extra_applications: [:logger]
-    ]
+    []
+  end
+
+  defp description() do
+    "Wrapper around common file system linux utilties."
   end
 
   # Run "mix help deps" to learn about dependencies.
@@ -25,6 +31,15 @@ defmodule FileSystemUtils.MixProject do
       {:jason, "~> 1.1"},
       {:cmark, "~> 0.6", only: :dev},
       {:ex_doc, "~> 0.16", only: :dev, runtime: false}
+    ]
+  end
+
+  defp package() do
+    [
+      name: "file_system_utils",
+      maintainers: ["Srivathsan Murali"],
+      licenses: ["Apache 2.0"],
+      links: %{"GitHub" => "https://github.com/srivathsanmurali/file_system_utils"}
     ]
   end
 end
