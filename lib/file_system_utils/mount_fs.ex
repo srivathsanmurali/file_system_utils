@@ -63,7 +63,7 @@ defmodule FileSystemUtils.MountFS do
     Path to the device
   """
   @spec umount(String.t(), [sudo: boolean]) :: :ok | {:error, String.t()}
-  def umount(device_path, opts) do
+  def umount(device_path, opts \\ []) do
     with true <- File.exists?(device_path),
          {cmd, args} <- base_mount_command("umount", opts),
          {_result, err_code} <- System.cmd(cmd, args ++ [device_path], stderr_to_stdout: true) do
