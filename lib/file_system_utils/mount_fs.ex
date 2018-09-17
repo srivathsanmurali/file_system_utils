@@ -31,16 +31,21 @@ defmodule FileSystemUtils.MountFS do
     - exfat
     - etc
   """
-  @spec mount(String.t(), String.t(), String.t()) :: :ok | {:error, String.t()}
-  def mount(device_path, mount_point_path, fs_type \\ "ext4") do
+  @spec mount(String.t(), String.t(), [fs_type: String.t(), sudo: boolean] | String.t()) :: :ok | {:error, String.t()}
+  def mount(device_path, mount_point_path, opts \\ [fs_type: "ext4"])
+
+  def mount(device_path, mount_point_path, fs_type) when is_bitstring(fs_type) do
+    mount(device_path, mount_point_path, fs_type: fs_type)
+  end
+
+  def mount(device_path, mount_point_path, opts) do
     with true <- File.exists?(device_path),
          true <- File.dir?(mount_point_path),
-         {_result, err_code} <-
-           System.cmd(
-             "mount",
-             ["-t", fs_type, device_path, mount_point_path],
-             stderr_to_stdout: true
-           ) do
+         {cmd, args} <- base_mount_command("mount", opts),
+         args <- add_fstype_to_mount(args, opts),
+         {result, err_code} <- System.cmd(cmd,
+                                          args ++ [device_path, mount_point_path],
+                                          stderr_to_stdout: true) do
       parse_error_code(err_code)
     else
       false -> {:error, "Device path or mount point path not valid"}
@@ -57,13 +62,29 @@ defmodule FileSystemUtils.MountFS do
   + device_path:
     Path to the device
   """
-  @spec umount(String.t()) :: :ok | {:error, String.t()}
-  def umount(device_path) do
+  @spec umount(String.t(), [sudo: boolean]) :: :ok | {:error, String.t()}
+  def umount(device_path, opts) do
     with true <- File.exists?(device_path),
-         {_result, err_code} <- System.cmd("umount", [device_path], stderr_to_stdout: true) do
+         {cmd, args} <- base_mount_command("umount", opts),
+         {_result, err_code} <- System.cmd(cmd, args ++ [device_path], stderr_to_stdout: true) do
       parse_error_code(err_code)
     else
       false -> {:error, "Device path doesn't exist"}
+    end
+  end
+
+  defp base_mount_command(actual_cmd, opts) do
+    if Keyword.get(opts, :sudo, false) do
+      {"sudo", ["-n", actual_cmd]}
+    else
+      {actual_cmd, []}
+    end
+  end
+
+  defp add_fstype_to_mount(args, opts) do
+    case Keyword.get(opts, :fstype) do
+      type when is_bitstring(type) -> args ++ ["-t", type]
+      _ -> args
     end
   end
 
