@@ -30,7 +30,7 @@ defmodule FileSystemUtils.MixProject do
     [
       {:jason, "~> 1.1"},
       {:cmark, "~> 0.6", only: :dev},
-      {:ex_doc, "~> 0.16", only: :dev, runtime: false}
+      {:ex_doc, "~> 0.19.1", only: :dev, runtime: false}
     ]
   end
 
