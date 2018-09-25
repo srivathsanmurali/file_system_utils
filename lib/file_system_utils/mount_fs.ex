@@ -43,7 +43,7 @@ defmodule FileSystemUtils.MountFS do
          true <- File.dir?(mount_point_path),
          {cmd, args} <- base_mount_command("mount", opts),
          args <- add_fstype_to_mount(args, opts),
-         {result, err_code} <- System.cmd(cmd,
+         {_result, err_code} <- System.cmd(cmd,
                                           args ++ [device_path, mount_point_path],
                                           stderr_to_stdout: true) do
       parse_error_code(err_code)

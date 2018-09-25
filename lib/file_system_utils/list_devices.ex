@@ -13,7 +13,7 @@ defmodule FileSystemUtils.ListDevices do
     + devices (default = "")
       If device(s) is passed as argument, information is only retrieved for those.
   """
-  def lsblk(devices \\ ""), do: do_lsblk(parse_device_to_list(devices))
+  def lsblk(devices \\ "", command_opts \\ []), do: do_lsblk(parse_device_to_list(devices), command_opts)
 
   @spec lsblk_only_scsi(devices :: binary | [binary]) :: map
   @doc """
@@ -23,7 +23,7 @@ defmodule FileSystemUtils.ListDevices do
     + devices (default = "")
       If device(s) is passed as argument, information is only retrieved for those.
   """
-  def lsblk_only_scsi(devices \\ ""), do: do_lsblk(["--scsi"] ++ parse_device_to_list(devices))
+  def lsblk_only_scsi(devices \\ "", command_opts \\ []), do: do_lsblk(["--scsi"] ++ parse_device_to_list(devices), command_opts)
 
   @spec list_devices_with_label(Boolean) :: [binary]
   @doc """
@@ -47,10 +47,10 @@ defmodule FileSystemUtils.ListDevices do
       + false: Return list of device names.
       + true : Returns list of paths to device.
   """
-  def list_devices(full_path \\ false)
+  def list_devices(full_path \\ false, opts \\ [])
 
-  def list_devices(true) do
-    with {:ok, devices} <- list_devices(false),
+  def list_devices(true, command_opts) do
+    with {:ok, devices} <- list_devices(false, command_opts),
          devices <- Enum.map(devices, &Path.wildcard("/dev/**/#{&1}")) |> List.flatten() do
       {:ok, devices}
     else
@@ -58,8 +58,8 @@ defmodule FileSystemUtils.ListDevices do
     end
   end
 
-  def list_devices(false) do
-    with {:ok, json} <- do_lsblk(),
+  def list_devices(false, command_opts) do
+    with {:ok, json} <- do_lsblk([], command_opts),
          names <- get_names(json["blockdevices"]) do
       {:ok, names}
     else
@@ -79,16 +79,25 @@ defmodule FileSystemUtils.ListDevices do
       false -> device["name"]
     end
   end
+  
+  defp base_lsblk_command(actual_cmd, opts) do
+    if Keyword.get(opts, :sudo, false) do
+      {"sudo", ["-n", actual_cmd]}
+    else
+      {actual_cmd, []}
+    end
+  end
 
   defp parse_device_to_list(""), do: []
   defp parse_device_to_list(device) when not is_list(device), do: [device]
   defp parse_device_to_list(devices) when is_list(devices), do: devices
 
-  defp do_lsblk(options \\ []) do
-    with {json, err_code} <-
+  defp do_lsblk(options, command_opts) do
+    with {cmd, args} <- base_lsblk_command("lsblk", command_opts),
+        {json, err_code} <-
            System.cmd(
-             "lsblk",
-             ["--json", "--fs"] ++ options,
+             cmd,
+             args ++ ["--json", "--fs"] ++ options,
              stderr_to_stdout: true
            ),
          :ok <- parse_error_code(err_code),
