@@ -5,7 +5,7 @@ defmodule FileSystemUtils.MixProject do
     [
       app: :file_system_utils,
       name: "file_system_utils",
-      version: "0.4.0",
+      version: "0.4.1",
       elixir: "~> 1.6",
       start_permanent: Mix.env() == :prod,
       description: description(),

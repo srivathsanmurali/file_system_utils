@@ -10,6 +10,19 @@ defmodule FileSystemUtils.FolderStructure do
     |> File.mkdir_p()
   end
 
+  @doc """
+  Ensure folder structure is used to create a folder structure either as a map 
+  or a nested lists.
+  The nested lists approach is preferred, but the map version is easier to store
+  as part of a database entry or json file.
+
+  Example:
+  ensure_folder_structure("/path/to/root", [
+    "dirA",
+    {"dirB", ["B1", "B2", {"B3", ["C1", "C2"]}]},
+    {"dirC", {"D1", "D2"}}
+  ])
+  """
   def ensure_folder_structure(rootpath, folder_structure) when is_map(folder_structure) do
     Enum.map(folder_structure, fn {folder, children} ->
       ensure_folder_structure(rootpath, folder)
